@@ -60,6 +60,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Spacing:** Use intentional, consistent spacing tokens — not random Tailwind steps.
 - **Depth:** Surfaces should have a layering system (base → elevated → floating), not all sit at the same z-plane.
 
+## Git Workflow
+- **Commit after each logical unit of work** — don't batch an entire session into one commit.
+- A "logical unit" is one of: a new section/feature, a bug fix, a visual redesign of a section, a batch of related tweaks from user feedback.
+- If the user gives multiple small requests in a row (e.g. "make logo bigger", "remove that line", "rename PMI"), batch those into one commit when there's a natural pause.
+- **Commit message format:** short imperative title (<72 chars), blank line, bullet list of what changed.
+- Always end commits with `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`.
+- **Push after every commit** — keep the remote in sync.
+- Never force-push to main.
+- Do not commit `temporary screenshots/`, `node_modules/`, or `.DS_Store` (already in `.gitignore`).
+
 ## Hard Rules
 - Do not add sections, features, or content not in the reference
 - Do not "improve" a reference design — match it
