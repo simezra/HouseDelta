@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HouseDelta — The True Cost of Owning a Home</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A2E2A'/%3E%3Cpath d='M16 5l10 22H6z' fill='none' stroke='%23D4A843' stroke-width='2'/%3E%3Cpath d='M16 10l7 14H9z' fill='none' stroke='%23D4A843' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A2E2A'/%3E%3Cpath d='M16 5l10 22H6z' fill='none' stroke='%23D4A843' stroke-width='2'/%3E%3Cpath d='M16 10l7 14H9z' fill='none' stroke='%23D4A843' stroke-width='1' opacity='0.4'/%3E%3Crect x='14' y='20' width='4' height='6' rx='0.5' fill='%23D4A843'/%3E%3C/svg%3E">
 <meta name="description" content="Interactive tools to understand mortgages, hidden costs, and the power of househacking. Compare renting vs buying vs househacking.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -166,7 +166,7 @@ tailwind.config = {
 <!-- ========== STICKY NAV ========== -->
 <nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-teal-800/95 backdrop-blur-md border-b border-white/5">
   <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
-    <a href="#hero" class="font-display text-xl text-white tracking-tight font-bold btn-primary flex items-center gap-2">House<span class="text-gold-400">Delta</span><svg class="w-4 h-4 opacity-70" viewBox="0 0 400 400" fill="#D4A843"><path d="m87.347 290.6 112.65-256.99h6.2996l106.35 256.99zm181.02-15.749-75.04-184.54-81.155 184.54z"/></svg></a>
+    <a href="#hero" class="font-display text-2xl text-white tracking-tight font-bold btn-primary flex items-center gap-2">House<span class="text-gold-400">Delta</span><svg class="h-[1.15em] w-auto" viewBox="60 20 280 290" fill="#D4A843"><path d="m87.347 290.6 112.65-256.99h6.2996l106.35 256.99zm181.02-15.749-75.04-184.54-81.155 184.54z"/><rect x="185" y="230" width="30" height="45" rx="3"/></svg></a>
     <div class="hidden md:flex items-center gap-8">
       <a href="#mortgage" class="nav-link text-sm text-white/70 font-medium">Mortgage</a>
       <a href="#hidden-costs" class="nav-link text-sm text-white/70 font-medium">Hidden Costs</a>
@@ -194,7 +194,6 @@ tailwind.config = {
 <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-14 noise-overlay overflow-hidden"
   style="background: #0A2E2A; background-image: radial-gradient(ellipse at 20% 80%, rgba(26,122,109,0.35) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(212,168,67,0.15) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(19,78,72,0.4) 0%, transparent 70%);">
   <div class="relative z-10 max-w-4xl text-center">
-    <p class="text-gold-400 font-sans text-sm font-semibold tracking-widest uppercase mb-6 reveal">Toronto Housing · Interactive Financial Explorer</p>
     <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-bold leading-[0.95] tracking-[-0.03em] mb-8 reveal">
       The True Cost<br>of Owning a Home
     </h1>
@@ -279,8 +278,9 @@ tailwind.config = {
           <div class="mb-4">
             <label class="text-sm font-medium text-charcoal-600 block mb-2">Loan Term</label>
             <div class="flex gap-2">
-              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-term="15">15 years</button>
-              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold active" data-term="30">30 years</button>
+              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-term="15">15 yr</button>
+              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-term="25">25 yr</button>
+              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold active" data-term="30">30 yr</button>
             </div>
           </div>
           <div class="pt-4 border-t border-sage-100">
@@ -664,7 +664,7 @@ tailwind.config = {
 <!-- ========== FOOTER ========== -->
 <footer class="py-12 px-6" style="background: #071E1B">
   <div class="max-w-7xl mx-auto text-center">
-    <p class="font-display text-xl text-white/80 font-bold mb-2 flex items-center justify-center gap-2">House<span class="text-gold-400">Delta</span><svg class="w-4 h-4 opacity-70" viewBox="0 0 400 400" fill="#D4A843"><path d="m87.347 290.6 112.65-256.99h6.2996l106.35 256.99zm181.02-15.749-75.04-184.54-81.155 184.54z"/></svg></p>
+    <p class="font-display text-xl text-white/80 font-bold mb-2 flex items-center justify-center gap-2">House<span class="text-gold-400">Delta</span><svg class="w-4 h-4 opacity-70" viewBox="0 0 400 400" fill="#D4A843"><path d="m87.347 290.6 112.65-256.99h6.2996l106.35 256.99zm181.02-15.749-75.04-184.54-81.155 184.54z"/><rect x="185" y="230" width="30" height="45" rx="3"/></svg></p>
     <p class="text-white/30 text-sm max-w-md mx-auto">Make informed housing decisions. All calculations are estimates for educational purposes — consult a financial advisor for personal advice.</p>
   </div>
 </footer>
@@ -981,7 +981,7 @@ function updateDonutChart() {
     { value: Math.round(b.insurance), name: 'Insurance', itemStyle: { color: '#22917F' } },
     { value: Math.round(b.maintenance), name: 'Maintenance', itemStyle: { color: '#2BB5A0' } }
   ];
-  if (b.pmi > 0) data.push({ value: Math.round(b.pmi), name: 'PMI', itemStyle: { color: '#F07563' } });
+  if (b.pmi > 0) data.push({ value: Math.round(b.pmi), name: 'CMHC Insurance', itemStyle: { color: '#F07563' } });
   const total = data.reduce((s, d) => s + d.value, 0);
 
   donutChart.setOption({
