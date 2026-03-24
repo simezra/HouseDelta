@@ -172,17 +172,43 @@ Build authority content around the calculator:
 
 ---
 
-## Roadmap (Business Features)
+## Monetization Sequence
 
-| Phase | Timeline | Features |
-|-------|----------|----------|
-| **v1.0** | Now | Calculator tool live, establish SEO presence |
-| **v1.1** | Apr 2026 | Add lead capture form, partner with 2–3 Toronto brokers |
-| **v1.2** | May 2026 | Affiliate links to Ratehub/Nesto, "See today's rates" integration |
-| **v2.0** | Jul 2026 | User accounts, save scenarios, email capture for newsletter |
-| **v2.1** | Sep 2026 | Premium tier launch, PDF reports, neighbourhood data |
-| **v3.0** | Jan 2027 | Broker marketplace, expand to Vancouver + Ottawa |
-| **v3.1** | 2027 | White-label licensing, API for brokerages |
+**Strategy: Build trust and users first, monetize with credibility.**
+
+Users → Reviews → Credibility → Premium revenue → Broker partnerships → Scale
+
+### Phase 1 — Free tool, build audience (Now → Summer 2026)
+- Ship polished calculator, optimize for SEO
+- Organic growth: Reddit, Twitter/X, Toronto homebuyer communities
+- Collect emails via "save your scenario" (free, no paywall yet)
+- Goal: **5,000 monthly users, 500 email subscribers**
+
+### Phase 2 — Freemium launch (Summer 2026)
+- User accounts, save & compare scenarios
+- Premium tier ($8–$15/mo): PDF reports, neighbourhood data, rate alerts, multi-property modeling
+- Actively collect reviews and testimonials from free users
+- Content/SEO blog: "True cost of buying in [neighbourhood]" articles
+- Goal: **200 paying subscribers ($2–$3K/mo), strong reviews/social proof**
+
+### Phase 3 — Affiliate & sponsored rates (Fall 2026)
+- Affiliate links to Ratehub/Nesto/Pine ("See today's best rates")
+- Sponsored rate placements from lenders inside the calculator
+- Newsletter with rate updates + affiliate links
+- Goal: **$3–$5K/mo affiliate + sponsorship revenue**
+
+### Phase 4 — Lead generation (Early 2027)
+- By now we have users, reviews, and credibility to attract broker partners
+- Lead capture forms at high-intent touchpoints (post-calculator, post-comparison)
+- Partner with 3–5 Toronto mortgage brokers, fixed fee per lead
+- Goal: **150 leads/mo × $50 = $7.5K/mo, total revenue $15–$20K/mo**
+
+### Phase 5 — Scale (2027+)
+- Broker marketplace (brokers bid on leads)
+- Expand to Vancouver, Ottawa, national
+- White-label licensing to brokerages ($200–$500/mo each)
+- API for financial advisors and real estate teams
+- Goal: **$50K+/mo revenue, multiple cities**
 
 ---
 
