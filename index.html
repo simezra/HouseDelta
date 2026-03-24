@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HouseDelta — The True Cost of Owning a Home</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230A2E2A'/%3E%3Cpath d='M16 5l10 22H6z' fill='none' stroke='%23D4A843' stroke-width='2'/%3E%3Cpath d='M16 10l7 14H9z' fill='none' stroke='%23D4A843' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E">
+<meta name="description" content="Interactive tools to understand mortgages, hidden costs, and the power of househacking. Compare renting vs buying vs househacking.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        teal: { 950: '#0A2E2A', 800: '#134E48', 600: '#1A7A6D', 500: '#22917F', 400: '#2BB5A0' },
+        gold: { 400: '#D4A843', 200: '#F0DCA0', 100: '#F8EDC8' },
+        sage: { 100: '#E8F0EC', 50: '#F4F8F6' },
+        coral: { 500: '#E85D4A', 400: '#F07563' },
+        charcoal: { 900: '#1A1A2E', 600: '#4A4A5A', 400: '#6B7280' }
+      },
+      fontFamily: {
+        display: ['Playfair Display', 'serif'],
+        sans: ['Outfit', 'sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  :root { --spring: cubic-bezier(0.34, 1.56, 0.64, 1); }
+  * { scrollbar-width: thin; scrollbar-color: #1A7A6D #F4F8F6; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Outfit', sans-serif; line-height: 1.7; }
+
+  .noise-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, #1A7A6D, #22917F);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #D4A843;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(10,46,42,0.25);
+    cursor: pointer;
+    transition: transform 0.2s var(--spring), box-shadow 0.2s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 4px 16px rgba(212,168,67,0.4);
+  }
+  input[type="range"]::-webkit-slider-thumb:active { transform: scale(0.95); }
+  input[type="range"]:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid #D4A843;
+    outline-offset: 3px;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #D4A843; border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(10,46,42,0.25); cursor: pointer;
+  }
+
+  .toggle-switch {
+    position: relative; width: 44px; height: 24px;
+    background: #6B7280; border-radius: 12px;
+    cursor: pointer; transition: background 0.3s ease; flex-shrink: 0;
+  }
+  .toggle-switch.active { background: #1A7A6D; }
+  .toggle-switch::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 20px; height: 20px; background: white; border-radius: 50%;
+    transition: transform 0.3s var(--spring);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+  .toggle-switch.active::after { transform: translateX(20px); }
+
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s var(--spring);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  .surface-elevated {
+    background: white;
+    box-shadow: 0 1px 3px rgba(10,46,42,0.06), 0 8px 24px rgba(10,46,42,0.04);
+    border-radius: 16px;
+  }
+  .surface-floating {
+    background: white;
+    box-shadow: 0 4px 12px rgba(10,46,42,0.08), 0 16px 48px rgba(10,46,42,0.06);
+    border-radius: 20px;
+  }
+
+  .btn-primary { transition: transform 0.2s var(--spring), opacity 0.2s ease; }
+  .btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
+  .btn-primary:focus-visible { outline: 2px solid #D4A843; outline-offset: 2px; }
+  .btn-primary:active { transform: translateY(0) scale(0.98); }
+
+  .pill-option { transition: background 0.3s ease, color 0.3s ease, transform 0.2s var(--spring); }
+  .pill-option:hover { transform: translateY(-1px); }
+  .pill-option:focus-visible { outline: 2px solid #D4A843; outline-offset: 2px; }
+  .pill-option:active { transform: scale(0.97); }
+  .pill-option.active { background: #1A7A6D; color: white; }
+
+  .stepper-btn { transition: transform 0.15s var(--spring), background 0.2s ease; }
+  .stepper-btn:hover { background: rgba(26,122,109,0.15); transform: scale(1.05); }
+  .stepper-btn:active { transform: scale(0.93); }
+  .stepper-btn:focus-visible { outline: 2px solid #D4A843; outline-offset: 2px; }
+
+  .chart-container { width: 100%; min-height: 320px; }
+
+  @keyframes bounce-down {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(10px); opacity: 1; }
+  }
+  .bounce-down { animation: bounce-down 2s ease-in-out infinite; }
+
+  .nav-link {
+    position: relative;
+    transition: color 0.2s ease, transform 0.15s var(--spring);
+  }
+  .nav-link::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 0; height: 2px; background: #D4A843;
+    transition: width 0.3s ease;
+  }
+  .nav-link:hover { color: #F0DCA0; }
+  .nav-link:hover::after { width: 100%; }
+  .nav-link.active { color: #F0DCA0; }
+  .nav-link.active::after { width: 100%; }
+  .nav-link:focus-visible { outline: 2px solid #D4A843; outline-offset: 4px; }
+
+  .mobile-menu {
+    transform: translateX(100%);
+    transition: transform 0.4s var(--spring);
+  }
+  .mobile-menu.open { transform: translateX(0); }
+
+  .cost-bar { transition: transform 0.6s var(--spring); transform-origin: left; }
+</style>
+</head>
+<body class="bg-sage-50 text-charcoal-900 font-sans overflow-x-hidden">
+
+<!-- ========== STICKY NAV ========== -->
+<nav id="main-nav" class="fixed top-0 left-0 right-0 z-50 bg-teal-800/95 backdrop-blur-md border-b border-white/5">
+  <div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
+    <a href="#hero" class="font-display text-xl text-white tracking-tight font-bold btn-primary flex items-center gap-2">House<span class="text-gold-400">Delta</span><svg class="w-4 h-4 opacity-70" viewBox="0 0 400 400" fill="#D4A843"><path d="m87.347 290.6 112.65-256.99h6.2996l106.35 256.99zm181.02-15.749-75.04-184.54-81.155 184.54z"/></svg></a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#mortgage" class="nav-link text-sm text-white/70 font-medium">Mortgage</a>
+      <a href="#hidden-costs" class="nav-link text-sm text-white/70 font-medium">Hidden Costs</a>
+      <a href="#househack" class="nav-link text-sm text-white/70 font-medium">Househack</a>
+      <a href="#comparison" class="nav-link text-sm text-white/70 font-medium">Compare</a>
+      <a href="#insights" class="nav-link text-sm text-white/70 font-medium">Insights</a>
+    </div>
+    <button id="menu-toggle" class="md:hidden text-white p-2 btn-primary" aria-label="Menu">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 bottom-0 w-64 bg-teal-950 p-8 flex flex-col gap-6 md:hidden z-50">
+    <button id="menu-close" class="self-end text-white p-2 btn-primary" aria-label="Close">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M6 18L18 6"/></svg>
+    </button>
+    <a href="#mortgage" class="text-white/80 text-lg font-medium nav-link">Mortgage</a>
+    <a href="#hidden-costs" class="text-white/80 text-lg font-medium nav-link">Hidden Costs</a>
+    <a href="#househack" class="text-white/80 text-lg font-medium nav-link">Househack</a>
+    <a href="#comparison" class="text-white/80 text-lg font-medium nav-link">Compare</a>
+    <a href="#insights" class="text-white/80 text-lg font-medium nav-link">Insights</a>
+  </div>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section id="hero" class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-14 noise-overlay overflow-hidden"
+  style="background: #0A2E2A; background-image: radial-gradient(ellipse at 20% 80%, rgba(26,122,109,0.35) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(212,168,67,0.15) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(19,78,72,0.4) 0%, transparent 70%);">
+  <div class="relative z-10 max-w-4xl text-center">
+    <p class="text-gold-400 font-sans text-sm font-semibold tracking-widest uppercase mb-6 reveal">Toronto Housing · Interactive Financial Explorer</p>
+    <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-white font-bold leading-[0.95] tracking-[-0.03em] mb-8 reveal">
+      The True Cost<br>of Owning a Home
+    </h1>
+
+    <!-- Interest shock blurb -->
+    <div class="max-w-2xl mx-auto mb-14 reveal" style="transition-delay:120ms">
+      <p class="text-white/50 font-light text-lg md:text-xl leading-relaxed">
+        The average Toronto home costs <span class="text-gold-400 font-semibold">$1.1M</span>. At today's rates, you'll pay over
+        <span class="text-coral-400 font-semibold">$900K in interest alone</span> — nearly doubling what you owe.
+        This tool shows you exactly where every dollar goes.
+      </p>
+    </div>
+
+    <!-- Navigation cards — like ratehub.ca section links -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 max-w-3xl mx-auto reveal" style="transition-delay:240ms">
+      <a href="#mortgage" class="group bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] hover:border-gold-400/30 rounded-2xl p-5 md:p-6 text-center transition-all duration-300 btn-primary">
+        <div class="w-11 h-11 rounded-xl bg-teal-600/20 group-hover:bg-teal-600/30 flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+          <svg width="22" height="22" fill="none" stroke="#2BB5A0" stroke-width="1.5"><rect x="3" y="10" width="16" height="10" rx="1.5"/><path d="M7 10V6a4 4 0 018 0v4"/><circle cx="11" cy="15" r="1.5"/></svg>
+        </div>
+        <span class="text-white/80 group-hover:text-white text-sm font-semibold block transition-colors">Mortgage<br>Anatomy</span>
+      </a>
+      <a href="#hidden-costs" class="group bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] hover:border-gold-400/30 rounded-2xl p-5 md:p-6 text-center transition-all duration-300 btn-primary">
+        <div class="w-11 h-11 rounded-xl bg-coral-500/20 group-hover:bg-coral-500/30 flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+          <svg width="22" height="22" fill="none" stroke="#F07563" stroke-width="1.5"><path d="M11 3l9 5v6c0 5-4 8.5-9 10-5-1.5-9-5-9-10V8z"/><path d="M8 12l2 2 4-4"/></svg>
+        </div>
+        <span class="text-white/80 group-hover:text-white text-sm font-semibold block transition-colors">Hidden<br>Costs</span>
+      </a>
+      <a href="#househack" class="group bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] hover:border-gold-400/30 rounded-2xl p-5 md:p-6 text-center transition-all duration-300 btn-primary">
+        <div class="w-11 h-11 rounded-xl bg-gold-400/20 group-hover:bg-gold-400/30 flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+          <svg width="22" height="22" fill="none" stroke="#D4A843" stroke-width="1.5"><path d="M3 12l8-7 8 7"/><path d="M5 10v9h12v-9"/><path d="M9 19v-5h4v5"/></svg>
+        </div>
+        <span class="text-white/80 group-hover:text-white text-sm font-semibold block transition-colors">Househack<br>Simulator</span>
+      </a>
+      <a href="#comparison" class="group bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] hover:border-gold-400/30 rounded-2xl p-5 md:p-6 text-center transition-all duration-300 btn-primary">
+        <div class="w-11 h-11 rounded-xl bg-teal-500/20 group-hover:bg-teal-500/30 flex items-center justify-center mx-auto mb-3 transition-colors duration-300">
+          <svg width="22" height="22" fill="none" stroke="#22917F" stroke-width="1.5"><path d="M4 18l4-6 4 3 6-10"/><circle cx="18" cy="5" r="2"/></svg>
+        </div>
+        <span class="text-white/80 group-hover:text-white text-sm font-semibold block transition-colors">Rent vs Buy<br>vs Househack</span>
+      </a>
+    </div>
+  </div>
+  <a href="#mortgage" class="absolute bottom-8 left-1/2 -translate-x-1/2 bounce-down z-10" aria-label="Scroll down">
+    <svg width="32" height="32" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M8 12l8 8 8-8"/></svg>
+  </a>
+</section>
+
+<!-- ========== MORTGAGE ANATOMY ========== -->
+<section id="mortgage" class="py-20 md:py-24 px-6 bg-sage-50">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-10 reveal">
+      <p class="text-teal-600 font-semibold text-xs uppercase tracking-widest mb-2">Section 01</p>
+      <h2 class="font-display text-3xl md:text-4xl font-bold tracking-[-0.03em] text-charcoal-900">Anatomy of a Mortgage</h2>
+      <p class="text-charcoal-400 mt-3 text-sm max-w-lg mx-auto">Drag the sliders and watch every number update in real-time.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-6 items-start">
+      <!-- Left column: Sliders + Donut -->
+      <div class="lg:col-span-2 flex flex-col gap-6">
+        <div class="surface-elevated p-6 reveal">
+          <h3 class="font-display text-lg font-semibold mb-5">Your Numbers</h3>
+          <div class="mb-5">
+            <div class="flex justify-between items-baseline mb-1.5">
+              <label class="text-sm font-medium text-charcoal-600">Home Price</label>
+              <span id="home-price-val" class="text-base font-semibold text-teal-600">$1,100,000</span>
+            </div>
+            <input type="range" id="home-price" min="200000" max="3000000" step="25000" value="1100000">
+          </div>
+          <div class="mb-5">
+            <div class="flex justify-between items-baseline mb-1.5">
+              <label class="text-sm font-medium text-charcoal-600">Down Payment</label>
+              <span id="down-pmt-val" class="text-base font-semibold text-teal-600">20% · $220,000</span>
+            </div>
+            <input type="range" id="down-pmt" min="5" max="50" step="1" value="20">
+          </div>
+          <div class="mb-5">
+            <div class="flex justify-between items-baseline mb-1.5">
+              <label class="text-sm font-medium text-charcoal-600">Interest Rate</label>
+              <span id="rate-val" class="text-base font-semibold text-teal-600">5.50%</span>
+            </div>
+            <input type="range" id="interest-rate" min="2" max="10" step="0.125" value="5.5">
+          </div>
+          <div class="mb-4">
+            <label class="text-sm font-medium text-charcoal-600 block mb-2">Loan Term</label>
+            <div class="flex gap-2">
+              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-term="15">15 years</button>
+              <button class="pill-option flex-1 py-2 rounded-xl text-sm font-semibold active" data-term="30">30 years</button>
+            </div>
+          </div>
+          <div class="pt-4 border-t border-sage-100">
+            <div class="flex justify-between items-baseline">
+              <span class="text-sm text-charcoal-400">Loan Amount</span>
+              <span id="loan-amount-display" class="font-semibold text-charcoal-900">$880,000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="surface-elevated p-6 reveal" style="transition-delay:200ms">
+          <h3 class="font-display text-lg font-semibold mb-1">Monthly Breakdown</h3>
+          <p class="text-charcoal-400 text-xs mb-3">Where every dollar of your payment goes</p>
+          <div id="donut-chart" class="chart-container" style="height:280px"></div>
+        </div>
+      </div>
+
+      <!-- Right column: Two charts -->
+      <div class="lg:col-span-3 flex flex-col gap-6">
+        <div class="surface-elevated p-5 reveal" style="transition-delay:100ms">
+          <h3 class="font-display text-base font-semibold mb-1">Total Interest Can Exceed Your Loan</h3>
+          <p class="text-charcoal-400 text-xs mb-3">Cumulative payments — watch interest overtake the original loan amount</p>
+          <div id="amort-chart" class="chart-container" style="height:260px"></div>
+        </div>
+        <div class="surface-elevated p-5 reveal" style="transition-delay:150ms">
+          <h3 class="font-display text-base font-semibold mb-1">Interest Dominates Early Years</h3>
+          <p class="text-charcoal-400 text-xs mb-3">Year-by-year breakdown — see how little goes to principal at the start</p>
+          <div id="yearly-chart" class="chart-container" style="height:260px"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-8 reveal" style="transition-delay:100ms">
+      <div class="surface-floating p-6 text-center">
+        <p class="text-charcoal-400 text-xs font-medium uppercase tracking-wider mb-1">Monthly Payment</p>
+        <p id="summary-monthly" class="text-3xl font-display font-bold text-teal-600">$4,997</p>
+        <p class="text-charcoal-400 text-xs mt-1">Principal & Interest only</p>
+      </div>
+      <div class="surface-floating p-6 text-center">
+        <p class="text-charcoal-400 text-xs font-medium uppercase tracking-wider mb-1">Total Interest</p>
+        <p id="summary-interest" class="text-3xl font-display font-bold text-coral-500">$918,756</p>
+        <p id="summary-interest-pct" class="text-charcoal-400 text-xs mt-1">84% of your home's price</p>
+      </div>
+      <div class="surface-floating p-6 text-center">
+        <p class="text-charcoal-400 text-xs font-medium uppercase tracking-wider mb-1">Total Cost</p>
+        <p id="summary-total" class="text-3xl font-display font-bold text-charcoal-900">$2,018,756</p>
+        <p class="text-charcoal-400 text-xs mt-1">Price + all interest paid</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== HIDDEN COSTS ========== -->
+<section id="hidden-costs" class="py-24 md:py-32 px-6 bg-sage-100">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-teal-600 font-semibold text-sm uppercase tracking-widest mb-3">Section 02</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em]">The Costs Nobody Tells You About</h2>
+      <p class="text-charcoal-400 mt-4 max-w-xl mx-auto">Toggle each cost to see how it impacts your real monthly payment.</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12 reveal" style="transition-delay:100ms" id="cost-cards">
+      <!-- Row 1: 4 cards -->
+      <div class="surface-elevated p-6 flex flex-col gap-3" data-cost="propertyTax">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-teal-600/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#1A7A6D" stroke-width="1.5"><rect x="3" y="7" width="14" height="11" rx="1"/><path d="M10 2l8 5H2z"/></svg>
+          </div>
+          <div class="toggle-switch active" data-toggle="propertyTax"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">Property Tax</h4><p class="text-charcoal-400 text-xs">0.67% of home value / year (Toronto)</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-teal-600">$450</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$5,400/yr</span>
+        </div>
+      </div>
+
+      <div class="surface-elevated p-6 flex flex-col gap-3" data-cost="insurance">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-teal-600/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#1A7A6D" stroke-width="1.5"><path d="M10 2l7 4v5c0 4-3.5 7-7 8-3.5-1-7-4-7-8V6z"/></svg>
+          </div>
+          <div class="toggle-switch active" data-toggle="insurance"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">Insurance</h4><p class="text-charcoal-400 text-xs">0.35% of home value / year</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-teal-600">$131</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$1,575/yr</span>
+        </div>
+      </div>
+
+      <div class="surface-elevated p-6 flex flex-col gap-3" data-cost="pmi">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-coral-500/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#E85D4A" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><path d="M10 7v3l2 2"/></svg>
+          </div>
+          <div class="toggle-switch active" data-toggle="pmi"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">CMHC Insurance</h4><p class="text-charcoal-400 text-xs">Mortgage insurance if &lt;20% down</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-coral-500">$0</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$0/yr</span>
+        </div>
+      </div>
+
+      <div class="surface-elevated p-6 flex flex-col gap-3" data-cost="maintenance">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-teal-600/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#1A7A6D" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 00-1.4 0l-6 6a1 1 0 000 1.4l2 2a1 1 0 001.4 0l6-6a1 1 0 000-1.4z"/><path d="M4 16l1.3-4L12 5.3 14.7 8 8 14.7z"/></svg>
+          </div>
+          <div class="toggle-switch active" data-toggle="maintenance"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">Maintenance</h4><p class="text-charcoal-400 text-xs">1.0% of home value / year</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-teal-600">$563</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$6,750/yr</span>
+        </div>
+      </div>
+
+      <div class="surface-elevated p-6 flex flex-col gap-3" data-cost="hoa">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-teal-600/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#1A7A6D" stroke-width="1.5"><rect x="2" y="10" width="6" height="8" rx="1"/><rect x="12" y="10" width="6" height="8" rx="1"/><rect x="7" y="4" width="6" height="14" rx="1"/></svg>
+          </div>
+          <div class="toggle-switch" data-toggle="hoa"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">HOA Fees</h4><p class="text-charcoal-400 text-xs">Monthly association dues</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-charcoal-400">$250</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$3,000/yr</span>
+        </div>
+      </div>
+
+      <div class="surface-elevated p-6 flex flex-col gap-3" data-cost="utilities">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-teal-600/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#1A7A6D" stroke-width="1.5"><path d="M10 2v4M10 14v4M2 10h4M14 10h4M4.9 4.9l2.8 2.8M12.3 12.3l2.8 2.8M4.9 15.1l2.8-2.8M12.3 7.7l2.8-2.8"/></svg>
+          </div>
+          <div class="toggle-switch active" data-toggle="utilities"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">Utilities</h4><p class="text-charcoal-400 text-xs">Electric, water, gas, etc.</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-teal-600">$300</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$3,600/yr</span>
+        </div>
+      </div>
+
+      <div class="surface-elevated p-6 flex flex-col gap-3 sm:col-span-2 lg:col-span-1" data-cost="closingCosts">
+        <div class="flex items-center justify-between">
+          <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center">
+            <svg width="20" height="20" fill="none" stroke="#D4A843" stroke-width="1.5"><path d="M4 4h12v14H4z"/><path d="M7 8h6M7 11h6M7 14h4"/></svg>
+          </div>
+          <div class="toggle-switch active" data-toggle="closingCosts"></div>
+        </div>
+        <div><h4 class="font-semibold text-sm">Closing Costs</h4><p class="text-charcoal-400 text-xs">1.5% of home price (amortized)</p></div>
+        <div class="mt-auto pt-2 border-t border-sage-100">
+          <span class="cost-monthly text-lg font-bold text-gold-400">$375</span><span class="text-charcoal-400 text-xs">/mo</span>
+          <span class="cost-yearly text-charcoal-400 text-xs ml-2">$4,500/yr</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="surface-floating p-8 md:p-10 reveal" style="transition-delay:200ms">
+      <h3 class="font-display text-xl font-semibold mb-6">The Reality Check</h3>
+      <div class="space-y-6">
+        <div>
+          <div class="flex justify-between items-baseline mb-2">
+            <span class="text-sm font-medium text-charcoal-600">What you thought you'd pay</span>
+            <span id="bar-pi-only" class="text-lg font-bold text-teal-600">$2,275/mo</span>
+          </div>
+          <div class="h-8 bg-sage-100 rounded-full overflow-hidden relative">
+            <div id="bar-thought" class="cost-bar h-full bg-gradient-to-r from-teal-600 to-teal-500 rounded-full" style="width:60%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between items-baseline mb-2">
+            <span class="text-sm font-medium text-charcoal-600">What you actually pay</span>
+            <span id="bar-actual-val" class="text-lg font-bold text-coral-500">$3,819/mo</span>
+          </div>
+          <div class="h-8 bg-sage-100 rounded-full overflow-hidden relative">
+            <div id="bar-actual" class="cost-bar h-full rounded-full" style="width:100%; background: linear-gradient(90deg, #1A7A6D 60%, #E85D4A 60%)"></div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 pt-2">
+          <span class="inline-block px-4 py-1.5 rounded-full bg-coral-500/10 text-coral-500 font-bold text-sm" id="delta-pct">+68% more</span>
+          <span class="text-charcoal-400 text-sm" id="delta-text">Hidden costs add $1,544 to your monthly payment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== HOUSEHACKING SIMULATOR ========== -->
+<section id="househack" class="py-24 md:py-32 px-6 relative noise-overlay overflow-hidden"
+  style="background: #0A2E2A; background-image: radial-gradient(ellipse at 70% 30%, rgba(26,122,109,0.3) 0%, transparent 50%), radial-gradient(ellipse at 30% 80%, rgba(212,168,67,0.12) 0%, transparent 50%);">
+  <div class="max-w-7xl mx-auto relative z-10">
+    <div class="text-center mb-16 reveal">
+      <p class="text-gold-400 font-semibold text-sm uppercase tracking-widest mb-3">Section 03</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white">The Househacking Advantage</h2>
+      <p class="text-white/50 mt-4 max-w-xl mx-auto">Rent out part of your home and let tenants pay your mortgage.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-5 gap-8 items-start">
+      <div class="lg:col-span-2 surface-floating p-8 reveal">
+        <h3 class="font-display text-xl font-semibold mb-6">Rental Setup</h3>
+        <div class="mb-6">
+          <label class="text-sm font-medium text-charcoal-600 block mb-3">Rooms / Units Rented</label>
+          <div class="flex items-center gap-4">
+            <button class="stepper-btn w-10 h-10 rounded-xl bg-teal-600/10 text-teal-600 font-bold text-xl flex items-center justify-center" data-step="-1">−</button>
+            <span id="units-val" class="text-3xl font-display font-bold text-teal-600 w-12 text-center">2</span>
+            <button class="stepper-btn w-10 h-10 rounded-xl bg-teal-600/10 text-teal-600 font-bold text-xl flex items-center justify-center" data-step="1">+</button>
+          </div>
+        </div>
+        <div class="mb-6">
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Rent per Unit</label>
+            <span id="rent-val" class="text-lg font-semibold text-teal-600">$1,500</span>
+          </div>
+          <input type="range" id="rent-per-unit" min="500" max="5000" step="50" value="2200">
+        </div>
+        <div class="mb-6">
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Vacancy Rate</label>
+            <span id="vacancy-val" class="text-lg font-semibold text-teal-600">8%</span>
+          </div>
+          <input type="range" id="vacancy-rate" min="0" max="20" step="1" value="5">
+        </div>
+        <div class="mb-6">
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Management Cost</label>
+            <span id="mgmt-val" class="text-lg font-semibold text-teal-600">0%</span>
+          </div>
+          <input type="range" id="mgmt-cost" min="0" max="15" step="1" value="0">
+        </div>
+      </div>
+
+      <div class="lg:col-span-3 flex flex-col gap-8">
+        <div class="surface-floating p-6 reveal" style="transition-delay:100ms">
+          <h3 class="font-display text-lg font-semibold mb-2">Rental Income Waterfall</h3>
+          <p class="text-charcoal-400 text-sm mb-4">From gross rent to net income after vacancy and management</p>
+          <div id="waterfall-chart" class="chart-container" style="height:300px"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 reveal" style="transition-delay:200ms">
+          <div class="surface-floating p-8 text-center">
+            <p class="text-charcoal-400 text-sm font-medium uppercase tracking-wider mb-2">Effective Housing Cost</p>
+            <p id="effective-cost" class="text-4xl font-display font-bold text-teal-600">$1,059</p>
+            <p id="effective-cost-note" class="text-charcoal-400 text-xs mt-2">After rental income offsets</p>
+          </div>
+          <div class="surface-floating p-8 text-center">
+            <p class="text-charcoal-400 text-sm font-medium uppercase tracking-wider mb-2">Break-Even Rent</p>
+            <p id="breakeven-rent" class="text-4xl font-display font-bold text-gold-400">$2,076</p>
+            <p class="text-charcoal-400 text-xs mt-2">Per unit for free housing</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== BIG COMPARISON ========== -->
+<section id="comparison" class="py-24 md:py-32 px-6 bg-sage-50">
+  <div class="max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <p class="text-teal-600 font-semibold text-sm uppercase tracking-widest mb-3">Section 04</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em]">The 30-Year Showdown</h2>
+      <p class="text-charcoal-400 mt-4 max-w-2xl mx-auto">Three strategies, one timeline. Which path builds the most wealth?</p>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-2 mb-8 reveal">
+      <button class="pill-option px-5 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-years="5">5 yr</button>
+      <button class="pill-option px-5 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-years="10">10 yr</button>
+      <button class="pill-option px-5 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-years="15">15 yr</button>
+      <button class="pill-option px-5 py-2 rounded-xl text-sm font-semibold bg-charcoal-400/10 text-charcoal-600" data-years="20">20 yr</button>
+      <button class="pill-option px-5 py-2 rounded-xl text-sm font-semibold active" data-years="30">30 yr</button>
+    </div>
+
+    <div class="surface-elevated p-6 mb-8 reveal" style="transition-delay:100ms">
+      <button id="sensitivity-toggle" class="flex items-center gap-2 text-sm font-semibold text-teal-600 btn-primary">
+        <svg id="sensitivity-arrow" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="transition: transform 0.3s ease"><path d="M4 6l4 4 4-4"/></svg>
+        Sensitivity Controls
+      </button>
+      <div id="sensitivity-panel" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-4" style="display:none">
+        <div>
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Home Appreciation</label>
+            <span id="appreciation-val" class="font-semibold text-teal-600">3%</span>
+          </div>
+          <input type="range" id="appreciation-rate" min="1" max="8" step="0.5" value="4">
+        </div>
+        <div>
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Investment Return</label>
+            <span id="invest-return-val" class="font-semibold text-teal-600">8%</span>
+          </div>
+          <input type="range" id="invest-return" min="4" max="12" step="0.5" value="8">
+        </div>
+        <div>
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Rent Growth</label>
+            <span id="rent-growth-val" class="font-semibold text-teal-600">3%</span>
+          </div>
+          <input type="range" id="rent-growth" min="1" max="6" step="0.5" value="3">
+        </div>
+        <div>
+          <div class="flex justify-between items-baseline mb-2">
+            <label class="text-sm font-medium text-charcoal-600">Current Rent</label>
+            <span id="current-rent-val" class="font-semibold text-teal-600">$2,000</span>
+          </div>
+          <input type="range" id="current-rent" min="500" max="6000" step="100" value="2800">
+        </div>
+      </div>
+    </div>
+
+    <div class="surface-floating p-6 md:p-8 mb-10 reveal" style="transition-delay:150ms">
+      <div id="comparison-chart" class="chart-container" style="height:420px"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 reveal" style="transition-delay:200ms">
+      <div id="card-rent" class="surface-elevated p-8 text-center border-2 border-transparent" style="transition: border-color 0.3s ease, box-shadow 0.3s ease">
+        <div class="w-12 h-12 rounded-full bg-gold-400/15 flex items-center justify-center mx-auto mb-4">
+          <svg width="24" height="24" fill="none" stroke="#D4A843" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
+        </div>
+        <h4 class="font-display text-lg font-semibold mb-1">Rent & Invest</h4>
+        <p id="rent-invest-nw" class="text-3xl font-display font-bold text-gold-400 my-3">$0</p>
+        <p id="rent-invest-note" class="text-charcoal-400 text-sm">Net worth at 30 years</p>
+      </div>
+      <div id="card-buy" class="surface-elevated p-8 text-center border-2 border-transparent" style="transition: border-color 0.3s ease, box-shadow 0.3s ease">
+        <div class="w-12 h-12 rounded-full bg-teal-600/15 flex items-center justify-center mx-auto mb-4">
+          <svg width="24" height="24" fill="none" stroke="#1A7A6D" stroke-width="1.5"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+        </div>
+        <h4 class="font-display text-lg font-semibold mb-1">Buy</h4>
+        <p id="buy-nw" class="text-3xl font-display font-bold text-teal-600 my-3">$0</p>
+        <p id="buy-note" class="text-charcoal-400 text-sm">Net worth at 30 years</p>
+      </div>
+      <div id="card-househack" class="surface-elevated p-8 text-center border-2 border-transparent" style="transition: border-color 0.3s ease, box-shadow 0.3s ease">
+        <div class="w-12 h-12 rounded-full bg-teal-500/15 flex items-center justify-center mx-auto mb-4">
+          <svg width="24" height="24" fill="none" stroke="#22917F" stroke-width="1.5"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 21v-6h6v6"/></svg>
+        </div>
+        <h4 class="font-display text-lg font-semibold mb-1">Househack & Invest</h4>
+        <p id="househack-nw" class="text-3xl font-display font-bold text-teal-500 my-3">$0</p>
+        <p id="househack-note" class="text-charcoal-400 text-sm">Net worth at 30 years</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== KEY INSIGHTS ========== -->
+<section id="insights" class="py-24 md:py-32 px-6 relative noise-overlay overflow-hidden"
+  style="background: linear-gradient(180deg, #0A2E2A 0%, #134E48 100%);">
+  <div class="max-w-4xl mx-auto relative z-10">
+    <div class="text-center mb-16 reveal">
+      <p class="text-gold-400 font-semibold text-sm uppercase tracking-widest mb-3">Section 05</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white">Your Personalized Insights</h2>
+      <p class="text-white/50 mt-4">Based on the numbers you've entered above</p>
+    </div>
+    <div class="space-y-5" id="insight-cards">
+      <div class="reveal bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border-l-4 border-gold-400">
+        <h4 class="font-display text-lg font-semibold text-gold-200 mb-2" id="insight-interest-title">Total Interest</h4>
+        <p class="text-white/70" id="insight-interest-body">Loading...</p>
+      </div>
+      <div class="reveal bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border-l-4 border-teal-500" style="transition-delay:80ms">
+        <h4 class="font-display text-lg font-semibold text-teal-400 mb-2" id="insight-hidden-title">Hidden Costs Impact</h4>
+        <p class="text-white/70" id="insight-hidden-body">Loading...</p>
+      </div>
+      <div class="reveal bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border-l-4 border-teal-400" style="transition-delay:160ms">
+        <h4 class="font-display text-lg font-semibold text-teal-300 mb-2" id="insight-househack-title">Househacking Power</h4>
+        <p class="text-white/70" id="insight-househack-body">Loading...</p>
+      </div>
+      <div class="reveal bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border-l-4 border-coral-400" style="transition-delay:240ms">
+        <h4 class="font-display text-lg font-semibold text-coral-400 mb-2" id="insight-breakeven-title">Break-Even Analysis</h4>
+        <p class="text-white/70" id="insight-breakeven-body">Loading...</p>
+      </div>
+      <div class="reveal bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border-l-4 border-gold-200" style="transition-delay:320ms">
+        <h4 class="font-display text-lg font-semibold text-gold-100 mb-2" id="insight-winner-title">Best Strategy</h4>
+        <p class="text-white/70" id="insight-winner-body">Loading...</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="py-12 px-6" style="background: #071E1B">
+  <div class="max-w-7xl mx-auto text-center">
+    <p class="font-display text-xl text-white/80 font-bold mb-2 flex items-center justify-center gap-2">House<span class="text-gold-400">Delta</span><svg class="w-4 h-4 opacity-70" viewBox="0 0 400 400" fill="#D4A843"><path d="m87.347 290.6 112.65-256.99h6.2996l106.35 256.99zm181.02-15.749-75.04-184.54-81.155 184.54z"/></svg></p>
+    <p class="text-white/30 text-sm max-w-md mx-auto">Make informed housing decisions. All calculations are estimates for educational purposes — consult a financial advisor for personal advice.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script>
+// ===================================================================
+// STATE
+// ===================================================================
+const state = {
+  homePrice: 1100000,
+  downPaymentPct: 20,
+  interestRate: 5.5,
+  loanTerm: 30,
+  propertyTaxRate: 0.67,
+  insuranceRate: 0.35,
+  pmiRate: 0.5,
+  maintenanceRate: 1.0,
+  hoaMonthly: 400,
+  utilitiesMonthly: 350,
+  closingCostPct: 1.5,
+  hiddenCosts: {
+    propertyTax: true, insurance: true, pmi: true,
+    maintenance: true, hoa: false, utilities: true, closingCosts: true
+  },
+  rentalUnits: 2,
+  rentPerUnit: 2200,
+  vacancyRate: 5,
+  managementCostPct: 0,
+  appreciationRate: 4,
+  investmentReturnRate: 8,
+  rentGrowthRate: 3,
+  currentRent: 2800,
+  timelineYears: 30,
+  computed: {}
+};
+
+const listeners = new Set();
+function subscribe(fn) { listeners.add(fn); }
+let rafPending = false;
+function updateState(partial) {
+  Object.assign(state, partial);
+  if (!rafPending) {
+    rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      recalculate();
+      listeners.forEach(fn => fn(state));
+    });
+  }
+}
+
+// ===================================================================
+// FORMATTERS
+// ===================================================================
+const fmtCurrency = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+const fmtCompact = (n) => {
+  if (Math.abs(n) >= 1000000) return '$' + (n / 1000000).toFixed(1) + 'M';
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n / 1000) + 'K';
+  return '$' + Math.round(n);
+};
+const fmtPct = (n) => n.toFixed(1) + '%';
+
+// ===================================================================
+// CALCULATIONS
+// ===================================================================
+function calcMortgagePayment(principal, annualRate, years) {
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  if (r === 0) return principal / n;
+  return principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+}
+
+function calcAmortizationSchedule(principal, annualRate, years) {
+  const r = annualRate / 100 / 12;
+  const n = years * 12;
+  const payment = calcMortgagePayment(principal, annualRate, years);
+  let balance = principal;
+  const schedule = [];
+  let cumPrincipal = 0, cumInterest = 0;
+  for (let m = 1; m <= n; m++) {
+    const interestPmt = balance * r;
+    const principalPmt = payment - interestPmt;
+    balance -= principalPmt;
+    cumPrincipal += principalPmt;
+    cumInterest += interestPmt;
+    schedule.push({ month: m, principal: principalPmt, interest: interestPmt, balance: Math.max(0, balance), cumPrincipal, cumInterest });
+  }
+  return schedule;
+}
+
+function calcMonthlyBreakdown() {
+  const s = state;
+  const loanAmt = s.homePrice * (1 - s.downPaymentPct / 100);
+  const pi = calcMortgagePayment(loanAmt, s.interestRate, s.loanTerm);
+  const r = s.interestRate / 100 / 12;
+  const firstInterest = loanAmt * r;
+  const firstPrincipal = pi - firstInterest;
+  const propertyTax = s.homePrice * s.propertyTaxRate / 100 / 12;
+  const insurance = s.homePrice * s.insuranceRate / 100 / 12;
+  const pmi = s.downPaymentPct < 20 ? loanAmt * s.pmiRate / 100 / 12 : 0;
+  const maintenance = s.homePrice * s.maintenanceRate / 100 / 12;
+  const hoa = s.hoaMonthly;
+  const utilities = s.utilitiesMonthly;
+  const closingCosts = s.homePrice * s.closingCostPct / 100 / (s.loanTerm * 12);
+  return { pi, firstPrincipal, firstInterest, propertyTax, insurance, pmi, maintenance, hoa, utilities, closingCosts, loanAmt };
+}
+
+function calcHiddenTotal(breakdown) {
+  const s = state;
+  let total = 0;
+  if (s.hiddenCosts.propertyTax) total += breakdown.propertyTax;
+  if (s.hiddenCosts.insurance) total += breakdown.insurance;
+  if (s.hiddenCosts.pmi) total += breakdown.pmi;
+  if (s.hiddenCosts.maintenance) total += breakdown.maintenance;
+  if (s.hiddenCosts.hoa) total += breakdown.hoa;
+  if (s.hiddenCosts.utilities) total += breakdown.utilities;
+  if (s.hiddenCosts.closingCosts) total += breakdown.closingCosts;
+  return total;
+}
+
+function calcAllInMonthly(breakdown) {
+  return breakdown.pi + calcHiddenTotal(breakdown);
+}
+
+function calcHousehackCashflow() {
+  const s = state;
+  const gross = s.rentalUnits * s.rentPerUnit;
+  const vacancy = gross * s.vacancyRate / 100;
+  const mgmt = gross * s.managementCostPct / 100;
+  const net = gross - vacancy - mgmt;
+  return { gross, vacancy, mgmt, net };
+}
+
+function calcNetWorthOverTime(years) {
+  const s = state;
+  const loanAmt = s.homePrice * (1 - s.downPaymentPct / 100);
+  const monthlyPI = calcMortgagePayment(loanAmt, s.interestRate, s.loanTerm);
+  const monthlyRate = s.interestRate / 100 / 12;
+  const breakdown = calcMonthlyBreakdown();
+  const allInMonthly = calcAllInMonthly(breakdown);
+  const househack = calcHousehackCashflow();
+  const downPayment = s.homePrice * s.downPaymentPct / 100;
+  const closingCosts = s.homePrice * s.closingCostPct / 100;
+  const investMonthly = s.investmentReturnRate / 100 / 12;
+  const appreciationMonthly = Math.pow(1 + s.appreciationRate / 100, 1/12) - 1;
+  const rentGrowthMonthly = Math.pow(1 + s.rentGrowthRate / 100, 1/12) - 1;
+  const totalMonths = years * 12;
+  const rentData = [], buyData = [], hackData = [];
+
+  let rentPortfolio = downPayment + closingCosts;
+  let currentRent = s.currentRent;
+  let mortgageBalance = loanAmt;
+  let homeValue = s.homePrice;
+  let hackPortfolio = 0;
+  let hackBalance = loanAmt;
+  let hackHomeValue = s.homePrice;
+
+  for (let m = 1; m <= totalMonths; m++) {
+    // Rent & Invest
+    const monthlySaving = allInMonthly - currentRent;
+    rentPortfolio = Math.max(0, rentPortfolio * (1 + investMonthly) + monthlySaving);
+    currentRent = currentRent * (1 + rentGrowthMonthly);
+
+    // Buy
+    if (mortgageBalance > 0) {
+      const buyInterest = mortgageBalance * monthlyRate;
+      const buyPrincipal = Math.min(monthlyPI - buyInterest, mortgageBalance);
+      mortgageBalance = Math.max(0, mortgageBalance - buyPrincipal);
+    }
+    homeValue = homeValue * (1 + appreciationMonthly);
+
+    // Househack
+    if (hackBalance > 0) {
+      const hackInterest = hackBalance * monthlyRate;
+      const hackPrincipalPmt = Math.min(monthlyPI - hackInterest, hackBalance);
+      hackBalance = Math.max(0, hackBalance - hackPrincipalPmt);
+    }
+    hackHomeValue = hackHomeValue * (1 + appreciationMonthly);
+    hackPortfolio = hackPortfolio * (1 + investMonthly) + househack.net;
+
+    if (m % 12 === 0) {
+      const year = m / 12;
+      rentData.push({ year, value: rentPortfolio });
+      buyData.push({ year, value: homeValue - mortgageBalance });
+      hackData.push({ year, value: (hackHomeValue - hackBalance) + hackPortfolio });
+    }
+  }
+  return { rentData, buyData, hackData };
+}
+
+function recalculate() {
+  const s = state;
+  const loanAmt = s.homePrice * (1 - s.downPaymentPct / 100);
+  const schedule = calcAmortizationSchedule(loanAmt, s.interestRate, s.loanTerm);
+  const breakdown = calcMonthlyBreakdown();
+  const househack = calcHousehackCashflow();
+  const totalInterest = schedule.length > 0 ? schedule[schedule.length - 1].cumInterest : 0;
+  const allInMonthly = calcAllInMonthly(breakdown);
+  const hiddenTotal = calcHiddenTotal(breakdown);
+  const comparison = calcNetWorthOverTime(s.timelineYears);
+  s.computed = { loanAmt, schedule, breakdown, househack, totalInterest, allInMonthly, hiddenTotal, comparison };
+}
+
+// ===================================================================
+// CHARTS
+// ===================================================================
+let amortChart, yearlyChart, donutChart, waterfallChart, comparisonChart;
+
+function initCharts() {
+  amortChart = echarts.init(document.getElementById('amort-chart'));
+  yearlyChart = echarts.init(document.getElementById('yearly-chart'));
+  donutChart = echarts.init(document.getElementById('donut-chart'));
+  waterfallChart = echarts.init(document.getElementById('waterfall-chart'));
+  comparisonChart = echarts.init(document.getElementById('comparison-chart'));
+  window.addEventListener('resize', () => {
+    amortChart.resize(); yearlyChart.resize(); donutChart.resize(); waterfallChart.resize(); comparisonChart.resize();
+  });
+}
+
+function updateAmortChart() {
+  const schedule = state.computed.schedule;
+  const loanAmt = state.computed.loanAmt;
+  const years = [], cumPrin = [], cumInt = [];
+  for (let i = 11; i < schedule.length; i += 12) {
+    years.push('Year ' + Math.ceil(schedule[i].month / 12));
+    cumPrin.push(Math.round(schedule[i].cumPrincipal));
+    cumInt.push(Math.round(schedule[i].cumInterest));
+  }
+  amortChart.setOption({
+    tooltip: { trigger: 'axis', backgroundColor: '#0A2E2A', borderColor: '#1A7A6D', textStyle: { color: '#F4F8F6', fontFamily: 'Outfit' },
+      formatter: (params) => {
+        let s = '<strong>' + params[0].name + '</strong><br/>';
+        params.forEach(p => {
+          if (p.seriesName !== 'Loan Amount') s += p.marker + ' ' + p.seriesName + ': ' + fmtCurrency(p.value) + '<br/>';
+        });
+        return s;
+      }
+    },
+    legend: { data: ['Principal Paid', 'Interest Paid', 'Loan Amount'], bottom: 0, textStyle: { fontFamily: 'Outfit', color: '#6B7280' } },
+    grid: { top: 10, right: 20, bottom: 40, left: 70 },
+    xAxis: { type: 'category', data: years, axisLabel: { fontFamily: 'Outfit', color: '#6B7280', interval: Math.max(0, Math.floor(years.length / 6) - 1) }, axisLine: { lineStyle: { color: '#E8F0EC' } } },
+    yAxis: { type: 'value', axisLabel: { fontFamily: 'Outfit', color: '#6B7280', formatter: v => fmtCompact(v) }, splitLine: { lineStyle: { color: '#E8F0EC' } } },
+    animationDuration: 600, animationEasing: 'cubicOut', animationDurationUpdate: 400,
+    series: [
+      { name: 'Principal Paid', type: 'line', stack: 'total',
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(26,122,109,0.5)'},{offset:1,color:'rgba(26,122,109,0.05)'}]) },
+        lineStyle: { color: '#1A7A6D', width: 2 }, itemStyle: { color: '#1A7A6D' }, smooth: true, symbol: 'none', data: cumPrin },
+      { name: 'Interest Paid', type: 'line', stack: 'total',
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(232,93,74,0.4)'},{offset:1,color:'rgba(232,93,74,0.03)'}]) },
+        lineStyle: { color: '#E85D4A', width: 2 }, itemStyle: { color: '#E85D4A' }, smooth: true, symbol: 'none', data: cumInt },
+      { name: 'Loan Amount', type: 'line', symbol: 'none',
+        lineStyle: { color: '#D4A843', width: 2, type: 'dashed' },
+        itemStyle: { color: '#D4A843' },
+        data: years.map(() => Math.round(loanAmt)),
+        markPoint: { data: [{ type: 'max', name: 'Loan', symbol: 'rect', symbolSize: 1 }], label: { show: false } }
+      }
+    ]
+  }, true);
+}
+
+function updateYearlyChart() {
+  const schedule = state.computed.schedule;
+  const years = [], yearPrin = [], yearInt = [];
+  for (let yr = 0; yr < schedule.length / 12; yr++) {
+    const start = yr * 12;
+    const end = Math.min(start + 12, schedule.length);
+    let prinSum = 0, intSum = 0;
+    for (let m = start; m < end; m++) {
+      prinSum += schedule[m].principal;
+      intSum += schedule[m].interest;
+    }
+    years.push('Yr ' + (yr + 1));
+    yearPrin.push(Math.round(prinSum));
+    yearInt.push(Math.round(intSum));
+  }
+  yearlyChart.setOption({
+    tooltip: { trigger: 'axis', backgroundColor: '#0A2E2A', borderColor: '#1A7A6D', textStyle: { color: '#F4F8F6', fontFamily: 'Outfit' },
+      formatter: (params) => {
+        let s = '<strong>' + params[0].name + '</strong><br/>';
+        let total = 0;
+        params.forEach(p => { s += p.marker + ' ' + p.seriesName + ': ' + fmtCurrency(p.value) + '<br/>'; total += p.value; });
+        const intPct = params[1] ? Math.round(params[1].value / total * 100) : 0;
+        s += '<span style="color:#F07563">(' + intPct + '% goes to interest)</span>';
+        return s;
+      }
+    },
+    legend: { data: ['Principal', 'Interest'], bottom: 0, textStyle: { fontFamily: 'Outfit', color: '#6B7280' } },
+    grid: { top: 10, right: 20, bottom: 40, left: 70 },
+    xAxis: { type: 'category', data: years,
+      axisLabel: { fontFamily: 'Outfit', color: '#6B7280', interval: Math.max(0, Math.floor(years.length / 6) - 1) },
+      axisLine: { lineStyle: { color: '#E8F0EC' } } },
+    yAxis: { type: 'value',
+      axisLabel: { fontFamily: 'Outfit', color: '#6B7280', formatter: v => fmtCompact(v) },
+      splitLine: { lineStyle: { color: '#E8F0EC' } } },
+    animationDuration: 600, animationEasing: 'cubicOut', animationDurationUpdate: 400,
+    series: [
+      { name: 'Principal', type: 'bar', stack: 'yearly', barWidth: '60%',
+        itemStyle: { color: '#1A7A6D', borderRadius: [0, 0, 0, 0] },
+        data: yearPrin },
+      { name: 'Interest', type: 'bar', stack: 'yearly',
+        itemStyle: { color: '#E85D4A', borderRadius: [4, 4, 0, 0] },
+        data: yearInt }
+    ]
+  }, true);
+}
+
+function updateDonutChart() {
+  const b = state.computed.breakdown;
+  const data = [
+    { value: Math.round(b.firstPrincipal), name: 'Principal', itemStyle: { color: '#1A7A6D' } },
+    { value: Math.round(b.firstInterest), name: 'Interest', itemStyle: { color: '#E85D4A' } },
+    { value: Math.round(b.propertyTax), name: 'Property Tax', itemStyle: { color: '#D4A843' } },
+    { value: Math.round(b.insurance), name: 'Insurance', itemStyle: { color: '#22917F' } },
+    { value: Math.round(b.maintenance), name: 'Maintenance', itemStyle: { color: '#2BB5A0' } }
+  ];
+  if (b.pmi > 0) data.push({ value: Math.round(b.pmi), name: 'PMI', itemStyle: { color: '#F07563' } });
+  const total = data.reduce((s, d) => s + d.value, 0);
+
+  donutChart.setOption({
+    tooltip: { trigger: 'item', backgroundColor: '#0A2E2A', borderColor: '#1A7A6D', textStyle: { color: '#F4F8F6', fontFamily: 'Outfit' },
+      formatter: p => p.marker + ' ' + p.name + ': ' + fmtCurrency(p.value) + '/mo (' + p.percent + '%)' },
+    legend: { bottom: 0, textStyle: { fontFamily: 'Outfit', color: '#6B7280' } },
+    series: [{ type: 'pie', radius: ['48%', '70%'], center: ['50%', '45%'], avoidLabelOverlap: true, padAngle: 2,
+      itemStyle: { borderRadius: 6 }, label: { show: false },
+      emphasis: { scaleSize: 8, label: { show: true, fontSize: 14, fontWeight: 600, fontFamily: 'Outfit' } }, data }],
+    graphic: [
+      { type: 'text', left: 'center', top: '38%', style: { text: fmtCurrency(total), textAlign: 'center', fill: '#1A1A2E', fontSize: 24, fontWeight: 700, fontFamily: 'Playfair Display' } },
+      { type: 'text', left: 'center', top: '48%', style: { text: '/month', textAlign: 'center', fill: '#6B7280', fontSize: 12, fontFamily: 'Outfit' } }
+    ],
+    animationDuration: 600, animationEasing: 'cubicOut', animationDurationUpdate: 400
+  }, true);
+}
+
+function updateWaterfallChart() {
+  const h = state.computed.househack;
+  waterfallChart.setOption({
+    tooltip: { trigger: 'axis', backgroundColor: '#0A2E2A', borderColor: '#1A7A6D', textStyle: { color: '#F4F8F6', fontFamily: 'Outfit' },
+      formatter: params => {
+        const items = params.filter(p => p.seriesIndex > 0 && p.value > 0);
+        if (!items.length) return '';
+        return items[0].name + ': ' + fmtCurrency(items[0].value);
+      }
+    },
+    grid: { top: 20, right: 20, bottom: 30, left: 70 },
+    xAxis: { type: 'category', data: ['Gross Rent', 'Vacancy', 'Mgmt Cost', 'Net Income'],
+      axisLabel: { fontFamily: 'Outfit', color: '#6B7280', fontSize: 11 }, axisLine: { lineStyle: { color: '#E8F0EC' } } },
+    yAxis: { type: 'value', axisLabel: { fontFamily: 'Outfit', color: '#6B7280', formatter: v => fmtCurrency(v) }, splitLine: { lineStyle: { color: '#E8F0EC' } } },
+    animationDuration: 600, animationEasing: 'cubicOut', animationDurationUpdate: 400,
+    series: [
+      { name: 'Base', type: 'bar', stack: 'waterfall', silent: true,
+        itemStyle: { borderColor: 'transparent', color: 'transparent' },
+        emphasis: { itemStyle: { borderColor: 'transparent', color: 'transparent' } },
+        data: [0, h.gross - h.vacancy, h.gross - h.vacancy - h.mgmt, 0] },
+      { name: 'Income', type: 'bar', stack: 'waterfall', barWidth: '50%',
+        label: { show: true, position: 'top', fontFamily: 'Outfit', fontSize: 11, color: '#4A4A5A',
+          formatter: p => p.value > 0 ? fmtCurrency(p.value) : '' },
+        data: [
+          { value: h.gross, itemStyle: { color: '#D4A843', borderRadius: [6,6,0,0] } },
+          { value: h.vacancy, itemStyle: { color: '#E85D4A', borderRadius: [0,0,6,6] } },
+          { value: h.mgmt, itemStyle: { color: h.mgmt > 0 ? '#F07563' : 'transparent', borderRadius: [0,0,6,6] } },
+          { value: h.net, itemStyle: { color: '#1A7A6D', borderRadius: [6,6,0,0] } }
+        ] }
+    ]
+  }, true);
+}
+
+function updateComparisonChart() {
+  const c = state.computed.comparison;
+  const years = c.rentData.map(d => 'Year ' + d.year);
+  comparisonChart.setOption({
+    tooltip: { trigger: 'axis', backgroundColor: '#0A2E2A', borderColor: '#1A7A6D', textStyle: { color: '#F4F8F6', fontFamily: 'Outfit' },
+      formatter: params => { let s = '<strong>' + params[0].name + '</strong><br/>'; params.forEach(p => { s += p.marker + ' ' + p.seriesName + ': ' + fmtCurrency(p.value) + '<br/>'; }); return s; } },
+    legend: { data: ['Rent & Invest', 'Buy', 'Househack & Invest'], bottom: 0, textStyle: { fontFamily: 'Outfit', color: '#6B7280' } },
+    grid: { top: 20, right: 20, bottom: 45, left: 70 },
+    xAxis: { type: 'category', data: years, axisLabel: { fontFamily: 'Outfit', color: '#6B7280', interval: Math.max(0, Math.floor(years.length / 6) - 1) }, axisLine: { lineStyle: { color: '#E8F0EC' } } },
+    yAxis: { type: 'value', axisLabel: { fontFamily: 'Outfit', color: '#6B7280', formatter: v => fmtCompact(v) }, splitLine: { lineStyle: { color: '#E8F0EC' } } },
+    animationDuration: 800, animationEasing: 'cubicOut', animationDurationUpdate: 500,
+    series: [
+      { name: 'Rent & Invest', type: 'line', smooth: true, symbol: 'none', lineStyle: { color: '#D4A843', width: 3 }, itemStyle: { color: '#D4A843' },
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(212,168,67,0.15)'},{offset:1,color:'rgba(212,168,67,0)'}]) },
+        data: c.rentData.map(d => Math.round(d.value)) },
+      { name: 'Buy', type: 'line', smooth: true, symbol: 'none', lineStyle: { color: '#1A7A6D', width: 3 }, itemStyle: { color: '#1A7A6D' },
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(26,122,109,0.15)'},{offset:1,color:'rgba(26,122,109,0)'}]) },
+        data: c.buyData.map(d => Math.round(d.value)) },
+      { name: 'Househack & Invest', type: 'line', smooth: true, symbol: 'none', lineStyle: { color: '#22917F', width: 3 }, itemStyle: { color: '#22917F' },
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(34,145,127,0.15)'},{offset:1,color:'rgba(34,145,127,0)'}]) },
+        data: c.hackData.map(d => Math.round(d.value)) }
+    ]
+  }, true);
+}
+
+// ===================================================================
+// UI UPDATERS
+// ===================================================================
+function updateAllUI() {
+  const s = state;
+  const c = s.computed;
+  const b = c.breakdown;
+
+  document.getElementById('home-price-val').textContent = fmtCurrency(s.homePrice);
+  const downAmt = s.homePrice * s.downPaymentPct / 100;
+  document.getElementById('down-pmt-val').textContent = s.downPaymentPct + '% \u00B7 ' + fmtCurrency(downAmt);
+  document.getElementById('rate-val').textContent = fmtPct(s.interestRate);
+  document.getElementById('loan-amount-display').textContent = fmtCurrency(c.loanAmt);
+
+  document.getElementById('summary-monthly').textContent = fmtCurrency(b.pi);
+  document.getElementById('summary-interest').textContent = fmtCurrency(c.totalInterest);
+  const interestPct = ((c.totalInterest / s.homePrice) * 100).toFixed(0);
+  document.getElementById('summary-interest-pct').textContent = interestPct + '% of your home\'s price';
+  document.getElementById('summary-total').textContent = fmtCurrency(s.homePrice + c.totalInterest);
+
+  const costMap = {
+    propertyTax: { monthly: b.propertyTax, yearly: b.propertyTax * 12 },
+    insurance: { monthly: b.insurance, yearly: b.insurance * 12 },
+    pmi: { monthly: b.pmi, yearly: b.pmi * 12 },
+    maintenance: { monthly: b.maintenance, yearly: b.maintenance * 12 },
+    hoa: { monthly: b.hoa, yearly: b.hoa * 12 },
+    utilities: { monthly: b.utilities, yearly: b.utilities * 12 },
+    closingCosts: { monthly: b.closingCosts, yearly: b.closingCosts * 12 }
+  };
+  document.querySelectorAll('[data-cost]').forEach(card => {
+    const key = card.dataset.cost;
+    const vals = costMap[key];
+    if (vals) {
+      card.querySelector('.cost-monthly').textContent = fmtCurrency(vals.monthly);
+      card.querySelector('.cost-yearly').textContent = fmtCurrency(vals.yearly) + '/yr';
+    }
+  });
+
+  const piOnly = b.pi;
+  const allIn = c.allInMonthly;
+  document.getElementById('bar-pi-only').textContent = fmtCurrency(piOnly) + '/mo';
+  document.getElementById('bar-actual-val').textContent = fmtCurrency(allIn) + '/mo';
+  const barRatio = allIn > 0 ? piOnly / allIn : 0.5;
+  document.getElementById('bar-thought').style.width = (barRatio * 100) + '%';
+  document.getElementById('bar-actual').style.background = 'linear-gradient(90deg, #1A7A6D ' + (barRatio * 100) + '%, #E85D4A ' + (barRatio * 100) + '%)';
+  const deltaPct = piOnly > 0 ? ((allIn - piOnly) / piOnly * 100).toFixed(0) : '0';
+  document.getElementById('delta-pct').textContent = '+' + deltaPct + '% more';
+  document.getElementById('delta-text').textContent = 'Hidden costs add ' + fmtCurrency(allIn - piOnly) + ' to your monthly payment';
+
+  const hh = c.househack;
+  document.getElementById('rent-val').textContent = fmtCurrency(s.rentPerUnit);
+  document.getElementById('vacancy-val').textContent = s.vacancyRate + '%';
+  document.getElementById('mgmt-val').textContent = s.managementCostPct + '%';
+  document.getElementById('units-val').textContent = s.rentalUnits;
+
+  const effectiveCost = allIn - hh.net;
+  const effectiveEl = document.getElementById('effective-cost');
+  const effectiveNote = document.getElementById('effective-cost-note');
+  if (effectiveCost <= 0) {
+    effectiveEl.className = 'text-4xl font-display font-bold text-gold-400';
+    effectiveNote.textContent = "You're getting PAID to live here!";
+    effectiveEl.textContent = '+' + fmtCurrency(Math.abs(effectiveCost));
+  } else {
+    effectiveEl.className = 'text-4xl font-display font-bold text-teal-600';
+    effectiveNote.textContent = 'After rental income offsets';
+    effectiveEl.textContent = fmtCurrency(effectiveCost);
+  }
+
+  const denominator = s.rentalUnits * (1 - s.vacancyRate / 100) * (1 - s.managementCostPct / 100);
+  const breakEvenRent = denominator > 0 ? allIn / denominator : 0;
+  document.getElementById('breakeven-rent').textContent = fmtCurrency(breakEvenRent);
+
+  document.getElementById('appreciation-val').textContent = s.appreciationRate + '%';
+  document.getElementById('invest-return-val').textContent = s.investmentReturnRate + '%';
+  document.getElementById('rent-growth-val').textContent = s.rentGrowthRate + '%';
+  document.getElementById('current-rent-val').textContent = fmtCurrency(s.currentRent);
+
+  const comp = c.comparison;
+  const rentFinal = comp.rentData.length > 0 ? comp.rentData[comp.rentData.length - 1].value : 0;
+  const buyFinal = comp.buyData.length > 0 ? comp.buyData[comp.buyData.length - 1].value : 0;
+  const hackFinal = comp.hackData.length > 0 ? comp.hackData[comp.hackData.length - 1].value : 0;
+
+  document.getElementById('rent-invest-nw').textContent = fmtCurrency(rentFinal);
+  document.getElementById('buy-nw').textContent = fmtCurrency(buyFinal);
+  document.getElementById('househack-nw').textContent = fmtCurrency(hackFinal);
+  document.getElementById('rent-invest-note').textContent = 'Net worth at ' + s.timelineYears + ' years';
+  document.getElementById('buy-note').textContent = 'Net worth at ' + s.timelineYears + ' years';
+  document.getElementById('househack-note').textContent = 'Net worth at ' + s.timelineYears + ' years';
+
+  const cards = [
+    { el: document.getElementById('card-rent'), val: rentFinal },
+    { el: document.getElementById('card-buy'), val: buyFinal },
+    { el: document.getElementById('card-househack'), val: hackFinal }
+  ];
+  const maxVal = Math.max(rentFinal, buyFinal, hackFinal);
+  cards.forEach(c => {
+    if (c.val === maxVal && maxVal > 0) {
+      c.el.style.borderColor = '#D4A843';
+      c.el.style.boxShadow = '0 0 30px rgba(212,168,67,0.15)';
+    } else {
+      c.el.style.borderColor = 'transparent';
+      c.el.style.boxShadow = '';
+    }
+  });
+
+  // Insights
+  document.getElementById('insight-interest-body').textContent =
+    'Over ' + s.loanTerm + ' years, you\'ll pay ' + fmtCurrency(c.totalInterest) + ' in interest alone \u2014 that\'s ' + interestPct + '% of your home\'s purchase price. Your total outlay is ' + fmtCurrency(s.homePrice + c.totalInterest) + '.';
+  document.getElementById('insight-hidden-body').textContent =
+    'Hidden costs add ' + fmtCurrency(c.hiddenTotal) + '/month (' + deltaPct + '%) on top of your mortgage payment. Your real monthly cost is ' + fmtCurrency(allIn) + ', not ' + fmtCurrency(piOnly) + '.';
+  const monthlySavings = hh.net;
+  document.getElementById('insight-househack-body').textContent =
+    'Renting ' + s.rentalUnits + ' unit' + (s.rentalUnits > 1 ? 's' : '') + ' at ' + fmtCurrency(s.rentPerUnit) + ' each generates ' + fmtCurrency(monthlySavings) + '/month in net income (' + fmtCurrency(monthlySavings * 12) + '/year), reducing your effective housing cost to ' + fmtCurrency(Math.max(0, effectiveCost)) + '/month.';
+
+  let breakEvenYear = 'never (within timeline)';
+  for (let i = 0; i < comp.buyData.length; i++) {
+    if (comp.buyData[i].value > comp.rentData[i].value) {
+      breakEvenYear = 'year ' + comp.buyData[i].year;
+      break;
+    }
+  }
+  document.getElementById('insight-breakeven-body').textContent =
+    'Buying beats renting at ' + breakEvenYear + '. At ' + s.appreciationRate + '% appreciation and ' + s.investmentReturnRate + '% investment returns, the crossover depends heavily on how long you stay.';
+
+  const winnerName = maxVal === hackFinal ? 'Househack & Invest' : maxVal === rentFinal ? 'Rent & Invest' : 'Buy';
+  const second = maxVal === hackFinal ? Math.max(rentFinal, buyFinal) : maxVal === rentFinal ? Math.max(buyFinal, hackFinal) : Math.max(rentFinal, hackFinal);
+  document.getElementById('insight-winner-body').textContent =
+    'Over ' + s.timelineYears + ' years, ' + winnerName + ' wins with ' + fmtCurrency(maxVal) + ' in net worth \u2014 ' + fmtCurrency(maxVal - second) + ' more than the next best strategy.';
+
+  updateAmortChart();
+  updateYearlyChart();
+  updateDonutChart();
+  updateWaterfallChart();
+  updateComparisonChart();
+}
+
+// ===================================================================
+// EVENT BINDINGS
+// ===================================================================
+function bindInputs() {
+  document.getElementById('home-price').addEventListener('input', e => updateState({ homePrice: +e.target.value }));
+  document.getElementById('down-pmt').addEventListener('input', e => updateState({ downPaymentPct: +e.target.value }));
+  document.getElementById('interest-rate').addEventListener('input', e => updateState({ interestRate: +e.target.value }));
+
+  document.querySelectorAll('[data-term]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-term]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateState({ loanTerm: +btn.dataset.term });
+    });
+  });
+
+  document.querySelectorAll('[data-toggle]').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const key = toggle.dataset.toggle;
+      toggle.classList.toggle('active');
+      updateState({ hiddenCosts: { ...state.hiddenCosts, [key]: toggle.classList.contains('active') } });
+    });
+  });
+
+  document.querySelectorAll('.stepper-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      updateState({ rentalUnits: Math.max(1, Math.min(6, state.rentalUnits + (+btn.dataset.step))) });
+    });
+  });
+  document.getElementById('rent-per-unit').addEventListener('input', e => updateState({ rentPerUnit: +e.target.value }));
+  document.getElementById('vacancy-rate').addEventListener('input', e => updateState({ vacancyRate: +e.target.value }));
+  document.getElementById('mgmt-cost').addEventListener('input', e => updateState({ managementCostPct: +e.target.value }));
+
+  document.querySelectorAll('[data-years]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-years]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateState({ timelineYears: +btn.dataset.years });
+    });
+  });
+  document.getElementById('appreciation-rate').addEventListener('input', e => updateState({ appreciationRate: +e.target.value }));
+  document.getElementById('invest-return').addEventListener('input', e => updateState({ investmentReturnRate: +e.target.value }));
+  document.getElementById('rent-growth').addEventListener('input', e => updateState({ rentGrowthRate: +e.target.value }));
+  document.getElementById('current-rent').addEventListener('input', e => updateState({ currentRent: +e.target.value }));
+
+  document.getElementById('sensitivity-toggle').addEventListener('click', () => {
+    const panel = document.getElementById('sensitivity-panel');
+    const arrow = document.getElementById('sensitivity-arrow');
+    const open = panel.style.display !== 'none';
+    panel.style.display = open ? 'none' : 'grid';
+    arrow.style.transform = open ? '' : 'rotate(180deg)';
+  });
+
+  document.getElementById('menu-toggle').addEventListener('click', () => document.getElementById('mobile-menu').classList.add('open'));
+  document.getElementById('menu-close').addEventListener('click', () => document.getElementById('mobile-menu').classList.remove('open'));
+  document.querySelectorAll('#mobile-menu a').forEach(a => a.addEventListener('click', () => document.getElementById('mobile-menu').classList.remove('open')));
+}
+
+// ===================================================================
+// SCROLL ANIMATIONS
+// ===================================================================
+function initScrollAnimations() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  const navObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  ['mortgage', 'hidden-costs', 'househack', 'comparison', 'insights'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) navObserver.observe(el);
+  });
+}
+
+// ===================================================================
+// HERO COUNTERS
+// ===================================================================
+function animateCounters() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseFloat(el.dataset.target);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        const format = el.dataset.format;
+        const duration = 1500;
+        const start = performance.now();
+        function tick(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = target * eased;
+          let display;
+          if (format === 'compact') display = prefix + Math.round(current / 1000) + 'K' + suffix;
+          else if (format === 'decimal') display = prefix + current.toFixed(1) + suffix;
+          else display = prefix + Math.round(current) + suffix;
+          el.textContent = display;
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.counter').forEach(c => observer.observe(c));
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initCharts();
+  recalculate();
+  subscribe(updateAllUI);
+  updateAllUI();
+  bindInputs();
+  initScrollAnimations();
+  animateCounters();
+});
+</script>
+</body>
+</html>
