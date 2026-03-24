@@ -159,6 +159,26 @@ tailwind.config = {
   .mobile-menu.open { transform: translateX(0); }
 
   .cost-bar { transition: transform 0.6s var(--spring); transform-origin: left; }
+
+  /* Info tooltips */
+  .info-tip {
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%; background: rgba(26,122,109,0.15);
+    color: #1A7A6D; font-size: 10px; font-weight: 700; cursor: help;
+    margin-left: 4px; vertical-align: middle; flex-shrink: 0;
+  }
+  .info-tip::after {
+    content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%) scale(0.95); background: #0A2E2A; color: #F4F8F6;
+    font-size: 12px; font-weight: 400; line-height: 1.5; padding: 10px 14px;
+    border-radius: 10px; white-space: normal; width: 260px; pointer-events: none;
+    opacity: 0; transition: opacity 0.2s ease, transform 0.2s var(--spring);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25); z-index: 100;
+  }
+  .info-tip:hover::after, .info-tip:focus::after {
+    opacity: 1; transform: translateX(-50%) scale(1); pointer-events: auto;
+  }
+  .info-tip-light { background: rgba(255,255,255,0.1); color: #F0DCA0; }
 </style>
 </head>
 <body class="bg-sage-50 text-charcoal-900 font-sans overflow-x-hidden">
@@ -173,6 +193,7 @@ tailwind.config = {
       <a href="#househack" class="nav-link text-sm text-white/70 font-medium">Househack</a>
       <a href="#comparison" class="nav-link text-sm text-white/70 font-medium">Compare</a>
       <a href="#insights" class="nav-link text-sm text-white/70 font-medium">Insights</a>
+      <a href="#resources" class="nav-link text-sm text-white/70 font-medium">Resources</a>
     </div>
     <button id="menu-toggle" class="md:hidden text-white p-2 btn-primary" aria-label="Menu">
       <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -480,14 +501,14 @@ tailwind.config = {
     <div class="text-center mb-16 reveal">
       <p class="text-gold-400 font-semibold text-sm uppercase tracking-widest mb-3">Section 03</p>
       <h2 class="font-display text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white">The Househacking Advantage</h2>
-      <p class="text-white/50 mt-4 max-w-xl mx-auto">Rent out part of your home and let tenants pay your mortgage.</p>
+      <p class="text-white/50 mt-4 max-w-xl mx-auto">Rent out part of your home and let tenants pay your mortgage. Per CRA rules, you can deduct the rental portion of your expenses.</p>
     </div>
 
     <div class="grid lg:grid-cols-5 gap-8 items-start">
       <div class="lg:col-span-2 surface-floating p-8 reveal">
         <h3 class="font-display text-xl font-semibold mb-6">Rental Setup</h3>
         <div class="mb-6">
-          <label class="text-sm font-medium text-charcoal-600 block mb-3">Rooms / Units Rented</label>
+          <label class="text-sm font-medium text-charcoal-600 mb-3 flex items-center">Rooms / Units Rented<span class="info-tip" data-tip="CRA lets you deduct expenses proportional to the rented area of your home (by sq ft or room count). Only the rental portion is deductible." tabindex="0">?</span></label>
           <div class="flex items-center gap-4">
             <button class="stepper-btn w-10 h-10 rounded-xl bg-teal-600/10 text-teal-600 font-bold text-xl flex items-center justify-center" data-step="-1">−</button>
             <span id="units-val" class="text-3xl font-display font-bold text-teal-600 w-12 text-center">2</span>
@@ -496,21 +517,21 @@ tailwind.config = {
         </div>
         <div class="mb-6">
           <div class="flex justify-between items-baseline mb-2">
-            <label class="text-sm font-medium text-charcoal-600">Rent per Unit</label>
+            <label class="text-sm font-medium text-charcoal-600 flex items-center">Rent per Unit<span class="info-tip" data-tip="Rental income must be reported to CRA using Form T776. You report gross rents and deduct eligible expenses like mortgage interest, insurance, and maintenance." tabindex="0">?</span></label>
             <span id="rent-val" class="text-lg font-semibold text-teal-600">$1,500</span>
           </div>
           <input type="range" id="rent-per-unit" min="500" max="5000" step="50" value="2200">
         </div>
         <div class="mb-6">
           <div class="flex justify-between items-baseline mb-2">
-            <label class="text-sm font-medium text-charcoal-600">Vacancy Rate</label>
+            <label class="text-sm font-medium text-charcoal-600 flex items-center">Vacancy Rate<span class="info-tip" data-tip="Typical Toronto vacancy is 1–5%. Budget for periods between tenants. CRA notes you must have a 'reasonable expectation of profit' to deduct rental losses." tabindex="0">?</span></label>
             <span id="vacancy-val" class="text-lg font-semibold text-teal-600">8%</span>
           </div>
           <input type="range" id="vacancy-rate" min="0" max="20" step="1" value="5">
         </div>
         <div class="mb-6">
           <div class="flex justify-between items-baseline mb-2">
-            <label class="text-sm font-medium text-charcoal-600">Management Cost</label>
+            <label class="text-sm font-medium text-charcoal-600 flex items-center">Management Cost<span class="info-tip" data-tip="Property management fees are fully deductible as a rental expense per CRA guidelines. Typical rates are 8–12% of collected rent." tabindex="0">?</span></label>
             <span id="mgmt-val" class="text-lg font-semibold text-teal-600">0%</span>
           </div>
           <input type="range" id="mgmt-cost" min="0" max="15" step="1" value="0">
@@ -657,6 +678,91 @@ tailwind.config = {
         <h4 class="font-display text-lg font-semibold text-gold-100 mb-2" id="insight-winner-title">Best Strategy</h4>
         <p class="text-white/70" id="insight-winner-body">Loading...</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== RESOURCES ========== -->
+<section id="resources" class="py-20 md:py-24 px-6 bg-sage-50">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-12 reveal">
+      <p class="text-teal-600 font-semibold text-xs uppercase tracking-widest mb-2">Resources</p>
+      <h2 class="font-display text-3xl md:text-4xl font-bold tracking-[-0.03em]">Official Canadian Sources</h2>
+      <p class="text-charcoal-400 mt-3 text-sm max-w-lg mx-auto">We link directly to government sources so you can verify everything yourself.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-5 reveal" style="transition-delay:100ms">
+      <!-- CRA Rental Income -->
+      <a href="https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/t4036/rental-income.html" target="_blank" rel="noopener" class="surface-elevated p-6 group btn-primary flex gap-4 items-start">
+        <div class="w-10 h-10 rounded-xl bg-coral-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="20" height="20" fill="none" stroke="#E85D4A" stroke-width="1.5"><path d="M4 4h12v14H4z"/><path d="M7 8h6M7 11h6M7 14h4"/></svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm group-hover:text-teal-600 transition-colors">CRA Guide T4036 — Rental Income</h4>
+          <p class="text-charcoal-400 text-xs mt-1 leading-relaxed">The definitive guide on reporting rental income, deductible expenses, and rules for renting part of your home. Essential for househackers.</p>
+          <span class="text-teal-600 text-xs font-semibold mt-2 inline-flex items-center gap-1">canada.ca <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h4v4M9 3L4 8"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Home Buyers' Amount -->
+      <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/line-31270-home-buyers-amount.html" target="_blank" rel="noopener" class="surface-elevated p-6 group btn-primary flex gap-4 items-start">
+        <div class="w-10 h-10 rounded-xl bg-teal-600/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="20" height="20" fill="none" stroke="#1A7A6D" stroke-width="1.5"><path d="M3 12l7-7 7 7"/><path d="M5 10v8h10v-8"/></svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm group-hover:text-teal-600 transition-colors">Home Buyers' Amount (Line 31270)</h4>
+          <p class="text-charcoal-400 text-xs mt-1 leading-relaxed">First-time buyers can claim up to $10,000 as a non-refundable tax credit. Check eligibility requirements and how to claim.</p>
+          <span class="text-teal-600 text-xs font-semibold mt-2 inline-flex items-center gap-1">canada.ca <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h4v4M9 3L4 8"/></svg></span>
+        </div>
+      </a>
+
+      <!-- CMHC Mortgage Insurance -->
+      <a href="https://www.cmhc-schl.gc.ca/consumers/home-buying/mortgage-loan-insurance-for-consumers" target="_blank" rel="noopener" class="surface-elevated p-6 group btn-primary flex gap-4 items-start">
+        <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="20" height="20" fill="none" stroke="#D4A843" stroke-width="1.5"><path d="M10 2l7 4v5c0 4-3.5 7-7 8-3.5-1-7-4-7-8V6z"/></svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm group-hover:text-teal-600 transition-colors">CMHC — Mortgage Loan Insurance</h4>
+          <p class="text-charcoal-400 text-xs mt-1 leading-relaxed">Required if your down payment is less than 20%. Understand CMHC insurance premiums and how they affect your costs.</p>
+          <span class="text-teal-600 text-xs font-semibold mt-2 inline-flex items-center gap-1">cmhc-schl.gc.ca <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h4v4M9 3L4 8"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Land Transfer Tax -->
+      <a href="https://www.ontario.ca/document/land-transfer-tax" target="_blank" rel="noopener" class="surface-elevated p-6 group btn-primary flex gap-4 items-start">
+        <div class="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="20" height="20" fill="none" stroke="#22917F" stroke-width="1.5"><rect x="3" y="7" width="14" height="11" rx="1"/><path d="M10 2l8 5H2z"/></svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm group-hover:text-teal-600 transition-colors">Ontario Land Transfer Tax</h4>
+          <p class="text-charcoal-400 text-xs mt-1 leading-relaxed">Toronto buyers pay both provincial and municipal land transfer tax. First-time buyers may qualify for rebates of up to $4,000 each.</p>
+          <span class="text-teal-600 text-xs font-semibold mt-2 inline-flex items-center gap-1">ontario.ca <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h4v4M9 3L4 8"/></svg></span>
+        </div>
+      </a>
+
+      <!-- Form T776 -->
+      <a href="https://www.canada.ca/en/revenue-agency/services/forms-publications/forms/t776.html" target="_blank" rel="noopener" class="surface-elevated p-6 group btn-primary flex gap-4 items-start">
+        <div class="w-10 h-10 rounded-xl bg-coral-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="20" height="20" fill="none" stroke="#E85D4A" stroke-width="1.5"><path d="M6 2h8l3 3v13H3V2z"/><path d="M6 8h8M6 11h8M6 14h5"/></svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm group-hover:text-teal-600 transition-colors">Form T776 — Statement of Real Estate Rentals</h4>
+          <p class="text-charcoal-400 text-xs mt-1 leading-relaxed">The form you'll file to report rental income and expenses. Download it and see exactly what CRA requires from landlords.</p>
+          <span class="text-teal-600 text-xs font-semibold mt-2 inline-flex items-center gap-1">canada.ca <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h4v4M9 3L4 8"/></svg></span>
+        </div>
+      </a>
+
+      <!-- FHSA -->
+      <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/first-home-savings-account.html" target="_blank" rel="noopener" class="surface-elevated p-6 group btn-primary flex gap-4 items-start">
+        <div class="w-10 h-10 rounded-xl bg-gold-400/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg width="20" height="20" fill="none" stroke="#D4A843" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6"/></svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-sm group-hover:text-teal-600 transition-colors">First Home Savings Account (FHSA)</h4>
+          <p class="text-charcoal-400 text-xs mt-1 leading-relaxed">Save up to $8,000/year tax-free for your first home. Contributions are tax-deductible and withdrawals for a home purchase are tax-free.</p>
+          <span class="text-teal-600 text-xs font-semibold mt-2 inline-flex items-center gap-1">canada.ca <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h4v4M9 3L4 8"/></svg></span>
+        </div>
+      </a>
     </div>
   </div>
 </section>
@@ -1274,7 +1380,7 @@ function initScrollAnimations() {
       }
     });
   }, { threshold: 0.3 });
-  ['mortgage', 'hidden-costs', 'househack', 'comparison', 'insights'].forEach(id => {
+  ['mortgage', 'hidden-costs', 'househack', 'comparison', 'insights', 'resources'].forEach(id => {
     const el = document.getElementById(id);
     if (el) navObserver.observe(el);
   });
